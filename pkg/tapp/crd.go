@@ -18,11 +18,12 @@
 package tapp
 
 import (
+	"context"
 	"reflect"
 
 	"tkestack.io/tapp/pkg/apis/tappcontroller"
 
-	extensionsobj "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	extv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/klog"
@@ -30,30 +31,35 @@ import (
 
 var scaleLabelSelector = ".status.scaleLabelSelector"
 
-var CRD = &extensionsobj.CustomResourceDefinition{
+var CRD = &extv1.CustomResourceDefinition{
 	ObjectMeta: metav1.ObjectMeta{
 		Name: "tapps." + tappcontroller.GroupName,
 	},
 	TypeMeta: metav1.TypeMeta{
 		Kind:       "CustomResourceDefinition",
-		APIVersion: "apiextensions.k8s.io/v1beta1",
+		APIVersion: "apiextensions.k8s.io/v1",
 	},
-	Spec: extensionsobj.CustomResourceDefinitionSpec{
-		Group:   tappcontroller.GroupName,
-		Version: "v1",
-		Scope:   extensionsobj.ResourceScope("Namespaced"),
-		Names: extensionsobj.CustomResourceDefinitionNames{
+	Spec: extv1.CustomResourceDefinitionSpec{
+		Group: tappcontroller.GroupName,
+		Scope: extv1.ResourceScope("Namespaced"),
+		Names: extv1.CustomResourceDefinitionNames{
 			Plural:   "tapps",
 			Singular: "tapp",
 			Kind:     "TApp",
 			ListKind: "TAppList",
 		},
-		Subresources: &extensionsobj.CustomResourceSubresources{
-			Status: &extensionsobj.CustomResourceSubresourceStatus{},
-			Scale: &extensionsobj.CustomResourceSubresourceScale{
-				SpecReplicasPath:   ".spec.replicas",
-				StatusReplicasPath: ".status.replicas",
-				LabelSelectorPath:  &scaleLabelSelector,
+		Versions: []extv1.CustomResourceDefinitionVersion{
+			{
+				Name:    "v1",
+				Served:  true,
+				Storage: true,
+				Schema: &extv1.CustomResourceValidation{
+					OpenAPIV3Schema: &extv1.JSONSchemaProps{
+						Type: "object",
+					},
+				},
+				Subresources:             &extv1.CustomResourceSubresources{},
+				AdditionalPrinterColumns: []extv1.CustomResourceColumnDefinition{},
 			},
 		},
 	},
@@ -62,8 +68,8 @@ var CRD = &extensionsobj.CustomResourceDefinition{
 // EnsureCRDCreated tries to create/update CRD, returns (true, nil) if succeeding, otherwise returns (false, nil).
 // 'err' should always be nil, because it is used by wait.PollUntil(), and it will exit if it is not nil.
 func EnsureCRDCreated(client apiextensionsclient.Interface) (created bool, err error) {
-	crdClient := client.ApiextensionsV1beta1().CustomResourceDefinitions()
-	presetCRD, err := crdClient.Get(CRD.Name, metav1.GetOptions{})
+	crdClient := client.ApiextensionsV1().CustomResourceDefinitions()
+	presetCRD, err := crdClient.Get(context.TODO(), CRD.Name, metav1.GetOptions{})
 	if err == nil {
 		if reflect.DeepEqual(presetCRD.Spec, CRD.Spec) {
 			klog.V(1).Infof("CRD %s already exists", CRD.Name)
@@ -72,7 +78,7 @@ func EnsureCRDCreated(client apiextensionsclient.Interface) (created bool, err e
 			newCRD := CRD
 			newCRD.ResourceVersion = presetCRD.ResourceVersion
 			// Update CRD
-			if _, err := crdClient.Update(newCRD); err != nil {
+			if _, err := crdClient.Update(context.TODO(), newCRD, metav1.UpdateOptions{}); err != nil {
 				klog.Errorf("Error update CRD %s: %v", CRD.Name, err)
 				return false, nil
 			}
@@ -80,7 +86,7 @@ func EnsureCRDCreated(client apiextensionsclient.Interface) (created bool, err e
 		}
 	} else {
 		// If not exist, create a new one
-		if _, err := crdClient.Create(CRD); err != nil {
+		if _, err := crdClient.Create(context.TODO(), CRD, metav1.CreateOptions{}); err != nil {
 			klog.Errorf("Error creating CRD %s: %v", CRD.Name, err)
 			return false, nil
 		}

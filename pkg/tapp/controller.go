@@ -18,6 +18,7 @@
 package tapp
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -1238,7 +1239,7 @@ func setInPlaceUpdateCondition(kubeclient kubernetes.Interface, podStore corelis
 
 		klog.V(3).Infof("Update pod %v %v condition to %v", getPodFullName(pod),
 			tappv1.InPlaceUpdateReady, status)
-		if _, err := kubeclient.CoreV1().Pods(pod.Namespace).UpdateStatus(pod); err != nil && errors.IsConflict(err) {
+		if _, err := kubeclient.CoreV1().Pods(pod.Namespace).UpdateStatus(context.TODO(), pod, metav1.UpdateOptions{}); err != nil && errors.IsConflict(err) {
 			klog.Errorf("Conflict to update pod %v condition, retrying", getPodFullName(pod))
 			newPod, err := podStore.Pods(pod.Namespace).Get(pod.Name)
 			if err != nil {

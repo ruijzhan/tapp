@@ -688,7 +688,7 @@ func createRollUpdateTestValues(instances []InstanceTestState, maxUnavailable in
 			pods = append(pods, instance.pod)
 		case deading:
 			instance := createTAppPod(tapp, id, corev1.PodRunning, corev1.ConditionTrue)
-			instance.pod.DeletionTimestamp = &metav1.Time{time.Now()}
+			instance.pod.DeletionTimestamp = &metav1.Time{Time: time.Now()}
 			pods = append(pods, instance.pod)
 		case complete:
 			instance := createTAppPod(tapp, id, corev1.PodFailed, corev1.ConditionFalse)

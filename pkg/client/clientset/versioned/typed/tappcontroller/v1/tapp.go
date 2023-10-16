@@ -19,14 +19,15 @@ limitations under the License.
 package v1
 
 import (
+	"context"
 	"time"
 
-	v1 "tkestack.io/tapp/pkg/apis/tappcontroller/v1"
-	scheme "tkestack.io/tapp/pkg/client/clientset/versioned/scheme"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
+	v1 "tkestack.io/tapp/pkg/apis/tappcontroller/v1"
+	scheme "tkestack.io/tapp/pkg/client/clientset/versioned/scheme"
 )
 
 // TAppsGetter has a method to return a TAppInterface.
@@ -71,7 +72,7 @@ func (c *tApps) Get(name string, options metav1.GetOptions) (result *v1.TApp, er
 		Resource("tapps").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -88,7 +89,7 @@ func (c *tApps) List(opts metav1.ListOptions) (result *v1.TAppList, err error) {
 		Resource("tapps").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -105,7 +106,7 @@ func (c *tApps) Watch(opts metav1.ListOptions) (watch.Interface, error) {
 		Resource("tapps").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(context.TODO())
 }
 
 // Create takes the representation of a tApp and creates it.  Returns the server's representation of the tApp, and an error, if there is any.
@@ -115,7 +116,7 @@ func (c *tApps) Create(tApp *v1.TApp) (result *v1.TApp, err error) {
 		Namespace(c.ns).
 		Resource("tapps").
 		Body(tApp).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -128,7 +129,7 @@ func (c *tApps) Update(tApp *v1.TApp) (result *v1.TApp, err error) {
 		Resource("tapps").
 		Name(tApp.Name).
 		Body(tApp).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -144,7 +145,7 @@ func (c *tApps) UpdateStatus(tApp *v1.TApp) (result *v1.TApp, err error) {
 		Name(tApp.Name).
 		SubResource("status").
 		Body(tApp).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -156,7 +157,7 @@ func (c *tApps) Delete(name string, options *metav1.DeleteOptions) error {
 		Resource("tapps").
 		Name(name).
 		Body(options).
-		Do().
+		Do(context.TODO()).
 		Error()
 }
 
@@ -172,7 +173,7 @@ func (c *tApps) DeleteCollection(options *metav1.DeleteOptions, listOptions meta
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Timeout(timeout).
 		Body(options).
-		Do().
+		Do(context.TODO()).
 		Error()
 }
 
@@ -185,7 +186,7 @@ func (c *tApps) Patch(name string, pt types.PatchType, data []byte, subresources
 		SubResource(subresources...).
 		Name(name).
 		Body(data).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }

@@ -42,7 +42,8 @@ import (
 	componentbaseconfig "k8s.io/component-base/config"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog"
-	"k8s.io/kubernetes/pkg/client/leaderelectionconfig"
+	// 已经迁移到 k8s.io/client-go/tools/leaderelection 包中, 需重构:
+	// "k8s.io/kubernetes/pkg/client/leaderelectionconfig"
 )
 
 var (
@@ -207,5 +208,6 @@ func addFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&tlsKeyFile, "tlsKeyFile", "/etc/certs/tls.key", "File containing the x509 private key to for HTTPS.")
 	fs.StringVar(&namespace, "namespace", "kube-system", "Namespace to deploy tapp controller")
 
-	leaderelectionconfig.BindFlags(&leaderElection, fs)
+	// 已经迁移到 k8s.io/client-go/tools/leaderelection 包中, 需重构
+	// leaderelectionconfig.BindFlags(&leaderElection, fs)
 }
