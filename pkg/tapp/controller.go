@@ -507,6 +507,16 @@ func (c *Controller) setDefaultValue(tapp *tappv1.TApp) {
 		maxUnavailable := intstr.FromString(tappv1.DefaultMaxUnavailableForceUpdate)
 		tapp.Spec.UpdateStrategy.ForceUpdate.MaxUnavailable = &maxUnavailable
 	}
+
+	// 在创建 tapp cr 的时候, pod template 的 metadata 死活都保存不了
+	// 而如果 metadata.labels 为空, 则过不了 tapp 的检查。只能在这里复制一份 labels
+	if tapp.Spec.Template.Labels == nil {
+		tapp.Spec.Template.Labels = make(map[string]string, len(tapp.Spec.Selector.MatchLabels))
+	}
+	for k, v := range tapp.Spec.Selector.MatchLabels {
+		tapp.Spec.Template.Labels[k] = v
+	}
+
 }
 
 func (c *Controller) removeUnusedTemplate(tapp *tappv1.TApp) error {
