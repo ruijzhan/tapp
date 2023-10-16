@@ -1,52 +1,39 @@
-.PHONY: all
+REGISTRY := tkestack
+TAG := v1.1.1
+SCRIPT_PATH := hack
+
+.PHONY: all clean build test verify verify-gofmt format deploy-image release release.multiarch
+
 all: verify-gofmt build test
 
-.PHONY: clean
 clean:
 	rm -rf bin/ _output/ go .version-defs
 
-.PHONY: build
 build:
-	hack/build.sh
-
-# ==============================================================================
-# Includes
+	$(SCRIPT_PATH)/build.sh
 
 include build/lib/common.mk
 include build/lib/image.mk
 
-# Run test
-#
-# Args:
-# 		TFLAGS: test flags
-# Example:
-# 		make test TFLAGS='-check.f xxx'
-.PHONY: test
 test:
-	TESTFLAGS=$(TFLAGS) hack/test-go.sh
+	TESTFLAGS=$(TFLAGS) $(SCRIPT_PATH)/test-go.sh
 
-.PHONY: verify
 verify:
-	hack/verify-all.sh
+	$(SCRIPT_PATH)/verify-all.sh
 
-.PHONY: verify-gofmt
 verify-gofmt:
-	hack/verify-gofmt.sh
+	$(SCRIPT_PATH)/verify-gofmt.sh
 
 format:
-	hack/format.sh
+	$(SCRIPT_PATH)/format.sh
 
-build-image: verify-gofmt
-	hack/build-image.sh tkestack/tapp-controller:latest
+deploy-image:
+	$(SCRIPT_PATH)/build-image.sh $(REGISTRY)/tapp-controller:$(TAG)
+	$(SCRIPT_PATH)/push-image.sh $(REGISTRY)/tapp-controller:$(TAG)
 
-push-image:
-	hack/push-image.sh tkestack/tapp-controller:latest
+release: deploy-image
 
-release: build-image push-image
-
-## release.multiarch: Build docker images for multiple platforms and push manifest lists to registry.
-.PHONY: release.multiarch
 release.multiarch:
-	@$(MAKE) image.manifest.push.multiarch BINS="tapp-controller" 
+	@$(MAKE) image.manifest.push.multiarch BINS="tapp-controller"
 
 #  vim: set ts=2 sw=2 tw=0 noet :

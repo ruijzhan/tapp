@@ -38,10 +38,9 @@ spec:
       serviceAccountName: tapp-controller
       containers:
         - name: tapp-controller
-          image: tkestack/tapp-controller:v1.1.1
+          image: ruijzhan/tapp-controller:v1.1.1
           args:
-            - "--v=3"
-            - "--register-admission=true"
+            - "--register-admission=false"
           imagePullPolicy: "Always"
           resources:
             requests:

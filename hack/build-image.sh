@@ -21,7 +21,7 @@ else
 fi
 
 export PATH=$PATH:$(go env GOPATH)/bin
-go get github.com/mitchellh/gox@v1.0.1
+go install github.com/mitchellh/gox@v1.0.1
 
 cd $ROOT
 CGO_ENABLED=0 gox -osarch="linux/amd64" -ldflags "$(api::version::ldflags)" \

@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "push image",
+			"command": "make",
+			"detail": "make deploy-image",
+			"args": [
+				"deploy-image",
+				"REGISTRY=ruijzhan"
+			],
+			"group": "build",
+		}
+	]
+}
