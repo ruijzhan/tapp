@@ -380,7 +380,7 @@ func (c *Controller) enqueueTApp(obj interface{}) {
 func (c *Controller) Sync(key string) error {
 	startTime := time.Now()
 	defer func() {
-		klog.V(4).Infof("Finished syncing tapp %s(%v)", key, time.Now().Sub(startTime))
+		klog.V(4).Infof("Finished syncing tapp %s(%v)", key, time.Since(startTime))
 	}()
 
 	if !c.podStoreSynced() {
@@ -1075,10 +1075,8 @@ func shouldUpdateTAppStatus(tapp *tappv1.TApp, pods []*corev1.Pod) bool {
 	}
 
 	appStatus := genAppStatus(tapp)
-	if appStatus != tapp.Status.AppStatus {
-		return true
-	}
-	return false
+
+	return appStatus != tapp.Status.AppStatus
 }
 
 func getTotalReplicas(statuses map[string]tappv1.InstanceStatus) (replica int32) {

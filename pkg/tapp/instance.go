@@ -27,7 +27,6 @@ import (
 	"tkestack.io/tapp/pkg/util"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -307,7 +306,7 @@ func (p *ApiServerInstanceClient) Get(ins *Instance) (*Instance, bool, error) {
 	found := true
 	ns := ins.parent.Namespace
 	pod, err := p.podLister.Pods(ns).Get(ins.pod.Name)
-	if errors.IsNotFound(err) {
+	if apierrors.IsNotFound(err) {
 		found = false
 		err = nil
 	}
@@ -322,7 +321,7 @@ func (p *ApiServerInstanceClient) Get(ins *Instance) (*Instance, bool, error) {
 func (p *ApiServerInstanceClient) Delete(ins *Instance, options metav1.DeleteOptions) error {
 	klog.V(2).Infof("Delete instance %s with option %+v", ins.getName(), options)
 	err := podClient(p.KubeClient, ins.parent.Namespace).Delete(context.TODO(), ins.pod.Name, options)
-	if errors.IsNotFound(err) {
+	if apierrors.IsNotFound(err) {
 		err = nil
 	}
 	p.event(ins.parent, "Delete", fmt.Sprintf("instance: %v", ins.pod.Name), err)

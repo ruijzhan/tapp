@@ -90,10 +90,7 @@ func getPodFullName(pod *corev1.Pod) string {
 }
 
 func isPodFailed(pod *corev1.Pod) bool {
-	if pod.Status.Phase == corev1.PodFailed {
-		return true
-	}
-	return false
+	return pod.Status.Phase == corev1.PodFailed
 }
 
 func isTAppFinished(tapp *v1.TApp) bool {

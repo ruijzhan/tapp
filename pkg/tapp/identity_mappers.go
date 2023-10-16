@@ -66,8 +66,6 @@ func (n *NameIdentityMapper) SetIdentity(id string, pod *corev1.Pod) {
 		pod.Spec.Hostname = pod.Name
 		pod.Spec.Subdomain = n.tapp.Spec.ServiceName
 	}
-
-	return
 }
 
 // Identity returns the name identity of the instance.
