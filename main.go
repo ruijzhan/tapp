@@ -193,7 +193,7 @@ func addFlags(fs *pflag.FlagSet) {
 	fs.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	fs.StringVar(&masterURL, "master", "",
 		"The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	fs.BoolVar(&createCRD, "create-crd", true, "Create TApp CRD if it does not exist")
+	fs.BoolVar(&createCRD, "create-crd", false, "Create TApp CRD if it does not exist")
 	fs.BoolVar(&deletePodAfterAppFinish, "delete-pod-after-app-finish", true,
 		"If true, delete instance pod after app finishes, otherwise delete pod once pod finishes")
 	fs.Float32Var(&kubeAPIQPS, "kube-api-qps", defaultKubeAPIQPS, "QPS to use while talking with kubernetes apiserver")
