@@ -19,6 +19,7 @@ package tapp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"sort"
@@ -408,6 +409,13 @@ func (c *Controller) Sync(key string) error {
 	err = c.preprocessTApp(tapp)
 	if err != nil {
 		klog.Errorf("Failed to preprocess tapp %s: %v", util.GetTAppFullName(tapp), err)
+		return err
+	}
+
+	// 参考本方法的 doc
+	err = restoreObjectMeta(tapp)
+	if err != nil {
+		klog.Errorf("Failed to restore object meta for tapp %s: %v", util.GetTAppFullName(tapp), err)
 		return err
 	}
 
@@ -1289,4 +1297,45 @@ func SetDeletePodAfterAppFinish(value bool) {
 
 func getDeletePodAfterAppFinish() bool {
 	return deletePodAfterAppFinish
+}
+
+// restoreObjectMeta 恢复了 tapp 资源的 Spec 中各字段的 ObjectMeta。由于 k8s 的原因，各字段的 ObjectMeta 在 保存 tapp 的时候，信息都会丢失。解决方案是在 kstone-etcd-operator 创建新的 tapp 时，将整个 tapp 序列化成 json，保存在顶层的 annotation 中，供本方法中进行读取，反序列化和值拷贝。如果 tapp 是从 kubectl apply 创建的，kubectl 也会将其保存到一个注解中。
+func restoreObjectMeta(tapp *tappv1.TApp) error {
+
+	const (
+		annotationKeyOperator = "tapp.tkestack.io/json"
+		annotationKeyKubectl  = "kubectl.kubernetes.io/last-applied-configuration"
+	)
+
+	js := tapp.Annotations[annotationKeyOperator]
+	if len(js) == 0 {
+		js = tapp.Annotations[annotationKeyKubectl]
+	}
+	if len(js) == 0 {
+		return fmt.Errorf("tapp %s/%s has no annotation %s or %s", tapp.Namespace, tapp.Name, annotationKeyOperator, annotationKeyKubectl)
+	}
+
+	tappMeta := &tappv1.TApp{}
+	err := json.Unmarshal([]byte(js), tappMeta)
+	if err != nil {
+		return err
+	}
+
+	copyMetadata(tappMeta, tapp)
+	return nil
+}
+
+func copyMetadata(from, to *tappv1.TApp) {
+
+	to.Spec.Template.ObjectMeta = from.Spec.Template.ObjectMeta
+
+	for k, v := range from.Spec.TemplatePool {
+		t := to.Spec.TemplatePool[k]
+		t.ObjectMeta = v.ObjectMeta
+		to.Spec.TemplatePool[k] = t
+	}
+
+	for i, v := range from.Spec.VolumeClaimTemplates {
+		to.Spec.VolumeClaimTemplates[i].ObjectMeta = v.ObjectMeta
+	}
 }
