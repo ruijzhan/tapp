@@ -55,16 +55,8 @@ func getPodTemplate(spec *v1.TAppSpec, id string) (*corev1.PodTemplateSpec, erro
 	templateName := getPodTemplateName(spec.Templates, id, spec.DefaultTemplateName)
 
 	if templateName == v1.DefaultTemplateName {
-		// 因为不能保存 template.metadata.labels（原因未知），在这里手动添加
-		if spec.Template.Labels == nil {
-			spec.Template.Labels = make(map[string]string, len(spec.Selector.MatchLabels))
-		}
-		for k, v := range spec.Selector.MatchLabels {
-			spec.Template.Labels[k] = v
-		}
 		return &spec.Template, nil
 	} else if template, ok := spec.TemplatePool[templateName]; ok {
-		// 这里可能需要跟上面一样，手动添加 labels
 		return &template, nil
 	} else {
 		return nil, fmt.Errorf("template not found in templatePool")
