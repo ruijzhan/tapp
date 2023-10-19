@@ -91,6 +91,7 @@ spec:
                   metadata:
                     description: Standard o
                     type: object
+                    x-kubernetes-preserve-unknown-fields: true
                   spec:
                     description: Specificat
                     properties:
@@ -3514,6 +3515,7 @@ spec:
                                     metadata:
                                       description: May contai
                                       type: object
+                                      x-kubernetes-preserve-unknown-fields: true
                                     spec:
                                       description: The specif
                                       properties:
@@ -4197,6 +4199,7 @@ spec:
                     metadata:
                       description: Standard o
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     spec:
                       description: Specificat
                       properties:
@@ -7620,6 +7623,7 @@ spec:
                                       metadata:
                                         description: May contai
                                         type: object
+                                        x-kubernetes-preserve-unknown-fields: true
                                       spec:
                                         description: The specif
                                         properties:
@@ -8340,6 +8344,7 @@ spec:
                     metadata:
                       description: Standard o
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     spec:
                       description: spec defin
                       properties:
